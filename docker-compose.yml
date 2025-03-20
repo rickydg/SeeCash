@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - budget-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - DATABASE_PATH=data/budget.db
+      - LOG_LEVEL=info
+      - MAX_DB_SIZE_MB=100
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 500M
+
+  frontend:
+    build: 
+      context: ./frontend
+      args:
+        - API_URL=${API_URL:-http://localhost:8080}
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 300M
+
+volumes:
+  budget-data:
+    driver: local
