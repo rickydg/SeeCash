@@ -1,20 +1,24 @@
-FROM node:18-alpine
+FROM node:16-alpine
 
 WORKDIR /app
 
-# Install production dependencies only
-COPY package*.json ./
-RUN npm ci --only=production
+# Clone the repository
+RUN apk add --no-cache git && \
+    git clone https://github.com/rickydg/SeeCash.git . && \
+    cd backend
 
-# Copy source code
-COPY . .
+# Change directory to backend
+WORKDIR /app/backend
+
+# Use npm install instead of npm ci
+RUN npm install --only=production
 
 # Create data directory with proper permissions
-RUN mkdir -p /app/data && chmod 755 /app/data
+RUN mkdir -p /app/backend/data && chmod 755 /app/backend/data
 
 # Add non-root user for security
-RUN adduser -D -H -h /app appuser && \
-    chown -R appuser:appuser /app
+RUN adduser -D -H -h /app/backend appuser && \
+    chown -R appuser:appuser /app/backend
 USER appuser
 
 # Set production environment

@@ -1,27 +1,31 @@
 # filepath: frontend/Dockerfile
 # Build stage
-FROM node:18-alpine as build
+FROM node:16-alpine as build
+
+ARG API_URL=http://localhost:8080
 
 WORKDIR /app
 
-# Install dependencies first (better caching)
-COPY package*.json ./
-RUN npm ci --only=production
+# Clone the repository
+RUN apk add --no-cache git && \
+    git clone https://github.com/rickydg/SeeCash.git . && \
+    cd frontend
 
-# Copy source and build
-COPY . .
-ARG API_URL
-ENV REACT_APP_API_URL=${API_URL:-http://localhost:8080}
-RUN npm run build
+# Change directory to frontend
+WORKDIR /app/frontend
 
-# Production stage
+# Use npm install instead of npm ci and build
+RUN npm install && \
+    REACT_APP_API_URL=$API_URL npm run build
+
+# Production environment
 FROM nginx:alpine
 
 # Add security headers and compression
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy built app from build stage
-COPY --from=build /app/build /usr/share/nginx/html
+COPY --from=build /app/frontend/build /usr/share/nginx/html
 
 # Add health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \

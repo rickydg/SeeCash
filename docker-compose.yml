@@ -2,11 +2,13 @@ version: '3.8'
 
 services:
   backend:
-    build: ./backend
+    image: seecash-backend
+    build:
+      context: ./backend
     ports:
       - "8080:8080"
     volumes:
-      - budget-data:/app/data
+      - /mnt/user/appdata/seecash/backend:/app/data
     environment:
       - NODE_ENV=production
       - PORT=8080
@@ -25,9 +27,13 @@ services:
         limits:
           cpus: '0.5'
           memory: 500M
+    labels:
+      - "com.unraid.name=SeeCash-Backend"
+      - "com.unraid.description=SeeCash Budget Application Backend"
 
   frontend:
-    build: 
+    image: seecash-frontend
+    build:
       context: ./frontend
       args:
         - API_URL=${API_URL:-http://localhost:8080}
@@ -47,7 +53,14 @@ services:
         limits:
           cpus: '0.3'
           memory: 300M
+    labels:
+      - "com.unraid.name=SeeCash-Frontend"
+      - "com.unraid.description=SeeCash Budget Application Frontend"
 
 volumes:
-  budget-data:
+  backend-data:
     driver: local
+    driver_opts:
+      type: none
+      device: /mnt/user/appdata/seecash/backend
+      o: bind
