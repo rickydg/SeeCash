@@ -2,10 +2,10 @@ version: '3.8'
 
 services:
   backend:
-    image: seecash-backend
     build:
       context: https://github.com/rickydg/SeeCash.git
       dockerfile: backend/Dockerfile
+    image: seecash-backend:latest
     ports:
       - "8080:8080"
     volumes:
@@ -33,10 +33,10 @@ services:
       - "com.unraid.description=SeeCash Budget Application Backend"
 
   frontend:
-    image: seecash-frontend
     build:
-      context: https://github.com/rickydg/SeeCash.git
+      context: https://github.com/rickydg/SeeCash.git#main
       dockerfile: frontend/Dockerfile
+    image: seecash-frontend:latest
     ports:
       - "${FRONTEND_PORT:-3000}:80"
     depends_on:
