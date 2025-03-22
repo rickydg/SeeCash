@@ -3,11 +3,11 @@ version: '3.8'
 services:
   backend:
     build:
-      context: https://github.com/rickydg/SeeCash.git
+      context: https://github.com/rickydg/SeeCash.git#main
       dockerfile: backend/Dockerfile
     image: seecash-backend:latest
     ports:
-      - "8080:8080"
+      - "${BACKEND_PORT:-8089}:8080"  # Use port 8089 by default or set BACKEND_PORT env variable
     volumes:
       - /mnt/user/appdata/seecash/backend:/app/data
     environment:
@@ -57,7 +57,7 @@ services:
       - "com.unraid.name=SeeCash-Frontend"
       - "com.unraid.description=SeeCash Budget Application Frontend"
     environment:
-      - API_URL=${API_URL:-http://localhost:8080}
+      - API_URL=http://backend:8080  # Point to the service name and internal port
 
 volumes:
   backend-data:
