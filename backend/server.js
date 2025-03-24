@@ -13,6 +13,9 @@ const port = process.env.PORT || 8080;
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from the frontend build directory
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Database setup
 const dbPath = path.join(__dirname, process.env.DATABASE_PATH || 'data/budget.db');
 
@@ -699,6 +702,11 @@ app.delete('/api/accounts/:id', async (req, res) => {
     console.error('Error deleting account:', err);
     res.status(500).json({ error: err.message });
   }
+});
+
+// Catch-all route to serve the frontend's index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Start server
